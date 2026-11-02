@@ -1127,3 +1127,7 @@ select:focus-visible {
 [dir="ltr"] .terms-content {
   text-align: left;
 }
+.modal.hidden,
+.install-banner.hidden {
+  display: none !important;
+}
