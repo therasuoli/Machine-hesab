@@ -1,22 +1,541 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#2563eb"><meta name="description" content="ماشین حساب حرفه‌ای چندزبانه و آفلاین">
-<link rel="manifest" href="manifest.json"><link rel="stylesheet" href="styles.css">
-<title>ماشین حساب حرفه‌ای</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#101827">
+  <meta name="description" content="Professional Calculator - ماشین حساب حرفه‌ای و ابزارهای کاربردی">
+  <meta name="author" content="هادی رسولی">
+
+  <title>Professional Calculator</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
+
 <body>
-<div class="app-shell">
-<header class="topbar">
-  <div class="brand"><span class="brand-icon">▦</span><div><strong id="appTitle">ماشین حساب حرفه‌ای</strong><small>by Hadi Rasouli</small></div></div>
-  <div class="head-actions"><select id="quickLang" aria-label="Language"><option value="fa">فارسی</option><option value="tr">Türkçe</option><option value="en">English</option><option value="ar">العربية</option></select><button id="themeBtn" class="icon-btn" aria-label="Theme">◐</button></div>
-</header>
-<div class="search-wrap"><span>⌕</span><input id="globalSearch" placeholder="جستجوی ابزار…"><kbd>Ctrl K</kbd></div>
-<nav id="tabs" class="tabs" aria-label="Main navigation"></nav>
-<main id="main" class="main-content"></main>
-<footer>Professional Calculator <span>•</span> Hadi Rasouli <span id="installArea"></span></footer>
-</div>
-<div id="toast" role="status" aria-live="polite"></div>
-<script type="module" src="app.js"></script>
-</body></html>
+
+  <!-- App Loader -->
+  <div id="app-loader" class="app-loader">
+    <div class="loader-content">
+      <div class="loader-icon">ƒx</div>
+      <h2>Professional Calculator</h2>
+      <div class="loader-spinner"></div>
+    </div>
+  </div>
+
+  <!-- Main Application -->
+  <div id="app" class="app-container">
+
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-icon">ƒx</div>
+        <div>
+          <h1>Professional Calculator</h1>
+          <p data-i18n="appSubtitle">ماشین حساب حرفه‌ای</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="theme-toggle" class="icon-button" aria-label="تغییر تم" title="تغییر تم">
+          <span>☾</span>
+        </button>
+
+        <button id="menu-toggle" class="icon-button" aria-label="باز کردن منو">
+          <span>☰</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav id="main-navigation" class="main-navigation">
+      <button class="nav-item active" data-page="calculator">
+        <span>⌗</span>
+        <span data-i18n="calculator">ماشین حساب</span>
+      </button>
+
+      <button class="nav-item" data-page="tools">
+        <span>▦</span>
+        <span data-i18n="tools">ابزارها</span>
+      </button>
+
+      <button class="nav-item" data-page="history">
+        <span>◷</span>
+        <span data-i18n="history">تاریخچه</span>
+      </button>
+
+      <button class="nav-item" data-page="favorites">
+        <span>☆</span>
+        <span data-i18n="favorites">علاقه‌مندی‌ها</span>
+      </button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Calculator Page -->
+      <section id="page-calculator" class="page active">
+
+        <div class="section-heading">
+          <div>
+            <h2 data-i18n="calculatorTitle">ماشین حساب</h2>
+            <p data-i18n="calculatorDescription">محاسبات سریع و دقیق</p>
+          </div>
+
+          <button id="calculator-mode-toggle" class="secondary-button">
+            علمی
+          </button>
+        </div>
+
+        <div class="calculator-card">
+
+          <div class="calculator-display">
+            <div id="calculation-expression" class="expression-display">0</div>
+            <div id="calculation-result" class="result-display">0</div>
+          </div>
+
+          <div id="scientific-keys" class="scientific-keys hidden">
+            <button data-action="function" data-value="sin">sin</button>
+            <button data-action="function" data-value="cos">cos</button>
+            <button data-action="function" data-value="tan">tan</button>
+            <button data-action="function" data-value="log">log</button>
+            <button data-action="function" data-value="ln">ln</button>
+            <button data-action="function" data-value="sqrt">√</button>
+            <button data-action="function" data-value="square">x²</button>
+            <button data-action="function" data-value="power">xʸ</button>
+          </div>
+
+          <div class="calculator-grid">
+
+            <button class="key-button utility-key" data-action="clear">AC</button>
+            <button class="key-button utility-key" data-action="delete">⌫</button>
+            <button class="key-button utility-key" data-action="percent">%</button>
+            <button class="key-button operator-key" data-value="/">÷</button>
+
+            <button class="key-button" data-value="7">7</button>
+            <button class="key-button" data-value="8">8</button>
+            <button class="key-button" data-value="9">9</button>
+            <button class="key-button operator-key" data-value="*">×</button>
+
+            <button class="key-button" data-value="4">4</button>
+            <button class="key-button" data-value="5">5</button>
+            <button class="key-button" data-value="6">6</button>
+            <button class="key-button operator-key" data-value="-">−</button>
+
+            <button class="key-button" data-value="1">1</button>
+            <button class="key-button" data-value="2">2</button>
+            <button class="key-button" data-value="3">3</button>
+            <button class="key-button operator-key" data-value="+">+</button>
+
+            <button class="key-button utility-key" data-action="sign">±</button>
+            <button class="key-button" data-value="0">0</button>
+            <button class="key-button" data-value=".">.</button>
+            <button class="key-button equal-key" data-action="calculate">=</button>
+
+          </div>
+
+          <div class="calculator-footer">
+            <button id="copy-result" class="text-button">کپی نتیجه</button>
+            <button id="save-favorite" class="text-button">☆ ذخیره</button>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Tools Page -->
+      <section id="page-tools" class="page">
+
+        <div class="section-heading">
+          <div>
+            <h2>ابزارهای کاربردی</h2>
+            <p>مجموعه‌ای از محاسبات و ابزارهای حرفه‌ای</p>
+          </div>
+        </div>
+
+        <div class="tools-grid">
+
+          <button class="tool-card" data-tool="percentage">
+            <span class="tool-icon">％</span>
+            <strong>محاسبه درصد</strong>
+            <small>درصدگیری و تغییرات درصدی</small>
+          </button>
+
+          <button class="tool-card" data-tool="discount">
+            <span class="tool-icon">٪</span>
+            <strong>محاسبه تخفیف</strong>
+            <small>قیمت نهایی پس از تخفیف</small>
+          </button>
+
+          <button class="tool-card" data-tool="loan">
+            <span class="tool-icon">▤</span>
+            <strong>محاسبه اقساط</strong>
+            <small>محاسبه وام و اقساط ماهانه</small>
+          </button>
+
+          <button class="tool-card" data-tool="interest">
+            <span class="tool-icon">↗</span>
+            <strong>سود و بهره</strong>
+            <small>محاسبه سود ساده و مرکب</small>
+          </button>
+
+          <button class="tool-card" data-tool="unit">
+            <span class="tool-icon">⇄</span>
+            <strong>تبدیل واحد</strong>
+            <small>طول، وزن، دما و حجم</small>
+          </button>
+
+          <button class="tool-card" data-tool="currency">
+            <span class="tool-icon">¤</span>
+            <strong>تبدیل ارز</strong>
+            <small>تبدیل واحدهای پولی</small>
+          </button>
+
+          <button class="tool-card" data-tool="bmi">
+            <span class="tool-icon">⌁</span>
+            <strong>محاسبه BMI</strong>
+            <small>محاسبه شاخص توده بدنی</small>
+          </button>
+
+          <button class="tool-card" data-tool="date">
+            <span class="tool-icon">▦</span>
+            <strong>تبدیل تاریخ</strong>
+            <small>ابزارهای تبدیل تاریخ</small>
+          </button>
+
+        </div>
+
+        <div id="tool-workspace" class="tool-workspace hidden"></div>
+
+      </section>
+
+      <!-- History Page -->
+      <section id="page-history" class="page">
+
+        <div class="section-heading">
+          <div>
+            <h2>تاریخچه محاسبات</h2>
+            <p>مشاهده محاسبات قبلی</p>
+          </div>
+
+          <button id="clear-history" class="danger-button">
+            پاک کردن
+          </button>
+        </div>
+
+        <div id="history-list" class="history-list">
+          <div class="empty-state">
+            <span>◷</span>
+            <p>هنوز محاسبه‌ای ثبت نشده است.</p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Favorites Page -->
+      <section id="page-favorites" class="page">
+
+        <div class="section-heading">
+          <div>
+            <h2>علاقه‌مندی‌ها</h2>
+            <p>محاسبات ذخیره‌شده شما</p>
+          </div>
+        </div>
+
+        <div id="favorites-list" class="favorites-list">
+          <div class="empty-state">
+            <span>☆</span>
+            <p>هنوز موردی ذخیره نشده است.</p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Settings Page -->
+      <section id="page-settings" class="page">
+
+        <div class="section-heading">
+          <div>
+            <h2>تنظیمات</h2>
+            <p>شخصی‌سازی اپلیکیشن</p>
+          </div>
+        </div>
+
+        <div class="settings-group">
+
+          <h3>ظاهر برنامه</h3>
+
+          <div class="setting-item">
+            <div>
+              <strong>حالت نمایش</strong>
+              <small>انتخاب تم روشن یا تاریک</small>
+            </div>
+            <select id="theme-select">
+              <option value="system">مطابق دستگاه</option>
+              <option value="light">روشن</option>
+              <option value="dark">تاریک</option>
+            </select>
+          </div>
+
+          <div class="setting-item">
+            <div>
+              <strong>زبان برنامه</strong>
+              <small>انتخاب زبان رابط کاربری</small>
+            </div>
+            <select id="language-select">
+              <option value="fa">فارسی</option>
+              <option value="en">English</option>
+              <option value="tr">Türkçe</option>
+              <option value="ar">العربية</option>
+            </select>
+          </div>
+
+        </div>
+
+        <div class="settings-group">
+
+          <h3>اعلان‌ها و یادآورها</h3>
+
+          <div class="setting-item">
+            <div>
+              <strong>اعلان‌های وب</strong>
+              <small>مدیریت اجازه نمایش اعلان‌ها</small>
+            </div>
+            <button id="enable-notifications" class="secondary-button">
+              فعال‌سازی
+            </button>
+          </div>
+
+          <div class="setting-item">
+            <div>
+              <strong>یادآور و آلارم</strong>
+              <small>تنظیم یادآور برای زمان دلخواه</small>
+            </div>
+            <button id="open-alarm" class="secondary-button">
+              تنظیم آلارم
+            </button>
+          </div>
+
+          <div id="alarm-panel" class="alarm-panel hidden">
+            <h4>تنظیم یادآور</h4>
+
+            <label for="alarm-title">عنوان یادآور</label>
+            <input id="alarm-title" type="text" placeholder="عنوان یادآور">
+
+            <label for="alarm-datetime">تاریخ و ساعت</label>
+            <input id="alarm-datetime" type="datetime-local">
+
+            <button id="save-alarm" class="primary-button">
+              ذخیره یادآور
+            </button>
+
+            <div id="alarm-list" class="alarm-list"></div>
+          </div>
+
+        </div>
+
+        <div class="settings-group">
+
+          <h3>راهنما و اطلاعات</h3>
+
+          <button id="replay-onboarding" class="setting-link">
+            <span>ⓘ</span>
+            <span>آموزش استفاده از اپلیکیشن</span>
+            <span>›</span>
+          </button>
+
+          <button class="setting-link" data-open-page="about">
+            <span>ⓘ</span>
+            <span>درباره ما</span>
+            <span>›</span>
+          </button>
+
+          <button class="setting-link" data-open-page="terms">
+            <span>▤</span>
+            <span>شرایط استفاده</span>
+            <span>›</span>
+          </button>
+
+        </div>
+
+      </section>
+
+      <!-- About Page -->
+      <section id="page-about" class="page">
+
+        <div class="section-heading">
+          <div>
+            <h2>درباره ما</h2>
+            <p>آشنایی با Professional Calculator</p>
+          </div>
+        </div>
+
+        <div class="information-card">
+          <div class="about-logo">ƒx</div>
+
+          <h2>Professional Calculator</h2>
+          <p class="about-version">نسخه 1.0.0</p>
+
+          <p>
+            Professional Calculator یک ابزار محاسباتی کاربردی با هدف
+            ارائه محاسبات سریع، ساده و حرفه‌ای است.
+          </p>
+
+          <div class="about-details">
+            <div>
+              <span>نام توسعه‌دهنده</span>
+              <strong>هادی رسولی</strong>
+            </div>
+
+            <div>
+              <span>سال توسعه</span>
+              <strong>۲۰۲۶</strong>
+            </div>
+          </div>
+
+          <button class="secondary-button full-width" data-open-page="terms">
+            مشاهده شرایط استفاده
+          </button>
+        </div>
+
+      </section>
+
+      <!-- Terms Page -->
+      <section id="page-terms" class="page">
+
+        <div class="section-heading">
+          <div>
+            <h2>شرایط استفاده</h2>
+            <p>قوانین و مقررات استفاده از برنامه</p>
+          </div>
+        </div>
+
+        <article class="information-card terms-content">
+
+          <h3>۱. پذیرش شرایط</h3>
+          <p>
+            با استفاده از Professional Calculator، شما موافقت خود را
+            با شرایط و مقررات استفاده از این اپلیکیشن اعلام می‌کنید.
+          </p>
+
+          <h3>۲. نحوه استفاده</h3>
+          <p>
+            این اپلیکیشن برای انجام محاسبات عمومی و ارائه ابزارهای
+            کاربردی طراحی شده است.
+          </p>
+
+          <h3>۳. دقت محاسبات</h3>
+          <p>
+            نتایج محاسبات باید متناسب با نیاز کاربر بررسی شوند.
+            برای تصمیم‌گیری‌های حساس مالی، پزشکی یا حقوقی،
+            به منابع تخصصی و معتبر مراجعه کنید.
+          </p>
+
+          <h3>۴. حریم خصوصی</h3>
+          <p>
+            اطلاعات ذخیره‌شده در دستگاه ممکن است برای ارائه امکاناتی
+            مانند تاریخچه، تنظیمات و علاقه‌مندی‌ها استفاده شوند.
+          </p>
+
+          <h3>۵. مسئولیت استفاده</h3>
+          <p>
+            مسئولیت بررسی و استفاده از نتایج محاسبات بر عهده کاربر است.
+          </p>
+
+          <h3>۶. به‌روزرسانی شرایط</h3>
+          <p>
+            ممکن است شرایط استفاده در نسخه‌های بعدی به‌روزرسانی شود.
+          </p>
+
+          <p class="terms-updated">آخرین به‌روزرسانی: ۲۰۲۶</p>
+
+        </article>
+
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      توسعه و طراحی توسط هادی رسولی | ۲۰۲۶
+    </footer>
+
+  </div>
+
+  <!-- Onboarding Modal -->
+  <div id="onboarding-modal" class="modal hidden" role="dialog" aria-modal="true">
+
+    <div class="modal-card onboarding-card">
+
+      <button id="close-onboarding" class="modal-close" aria-label="بستن">
+        ×
+      </button>
+
+      <div class="onboarding-illustration" id="onboarding-icon">ƒx</div>
+
+      <div class="onboarding-progress">
+        <span id="onboarding-step-indicator">۱ از ۴</span>
+        <div class="progress-track">
+          <div id="onboarding-progress-bar"></div>
+        </div>
+      </div>
+
+      <h2 id="onboarding-title">به Professional Calculator خوش آمدید</h2>
+
+      <p id="onboarding-description">
+        محاسبات خود را سریع‌تر و آسان‌تر انجام دهید.
+      </p>
+
+      <div class="modal-actions">
+        <button id="onboarding-skip" class="text-button">رد کردن</button>
+        <button id="onboarding-next" class="primary-button">بعدی</button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- PWA Install Notification -->
+  <div id="install-banner" class="install-banner hidden">
+
+    <div class="install-info">
+      <div class="install-icon">ƒx</div>
+      <div>
+        <strong>نصب Professional Calculator</strong>
+        <p>اپلیکیشن را به صفحه اصلی اضافه کنید.</p>
+      </div>
+    </div>
+
+    <div class="install-actions">
+      <button id="install-app" class="primary-button">نصب اپلیکیشن</button>
+      <button id="dismiss-install" class="text-button">بعداً</button>
+    </div>
+
+    <p id="ios-install-help" class="ios-install-help hidden">
+      از گزینه Share مرورگر، گزینه Add to Home Screen را انتخاب کنید.
+    </p>
+
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="app.js"></script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js")
+          .catch(error => console.error("Service Worker Error:", error));
+      });
+    }
+  </script>
+
+</body>
+</html>
