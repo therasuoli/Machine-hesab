@@ -1,41 +1,1295 @@
-const $=s=>document.querySelector(s), store={get(k,d){try{return JSON.parse(localStorage.getItem('pc_'+k))??d}catch{return d}},set(k,v){localStorage.setItem('pc_'+k,JSON.stringify(v))}};
-const dict={
-fa:{title:'ماشین حساب حرفه‌ای',tabs:['پایه','علمی','مالی','تبدیل','ابزارها','تنظیمات'],search:'جستجوی ابزار…',basic:'ماشین حساب پایه',scientific:'ماشین حساب علمی',history:'تاریخچه',copy:'کپی نتیجه',clear:'پاک کردن',profit:'سود و زیان',discount:'تخفیف',tax:'مالیات / ارزش افزوده',install:'اقساط',percent:'درصد',invest:'سرمایه‌گذاری',unit:'تبدیل واحد',toman:'تومان ↔ ریال',quantity:'تعداد × قیمت واحد',area:'مساحت و کاشی',date:'تاریخ و سن',bmi:'BMI و سلامت',fuel:'سوخت و مسافت',currency:'ارز',random:'ابزار تصادفی',fraction:'کسرها',programmer:'برنامه‌نویسی',settings:'تنظیمات',language:'زبان',theme:'پوسته',precision:'دقت اعشار',save:'ذخیره',calculate:'محاسبه',cost:'قیمت تمام‌شده',sale:'قیمت فروش',price:'قیمت',rate:'درصد',amount:'مبلغ',result:'نتیجه',dark:'تیره',light:'روشن',auto:'خودکار',note:'یادداشت',empty:'هنوز محاسبه‌ای ثبت نشده است',delete:'حذف',all:'همه',error:'عبارت نامعتبر است',memory:'حافظه',use:'استفاده در ابزار بعدی'},
-tr:{title:'Profesyonel Hesap Makinesi',tabs:['Temel','Bilimsel','Finans','Dönüştür','Araçlar','Ayarlar'],search:'Araç ara…',basic:'Temel hesap makinesi',scientific:'Bilimsel hesap makinesi',history:'Geçmiş',copy:'Sonucu kopyala',clear:'Temizle',profit:'Kâr / Zarar',discount:'İndirim',tax:'Vergi / KDV',install:'Taksit',percent:'Yüzde',invest:'Yatırım',unit:'Birim dönüştürücü',toman:'Tümen ↔ Riyal',quantity:'Miktar × Birim fiyat',area:'Alan ve fayans',date:'Tarih ve yaş',bmi:'BMI ve sağlık',fuel:'Yakıt ve mesafe',currency:'Döviz',random:'Rastgele araçlar',fraction:'Kesirler',programmer:'Programcı',settings:'Ayarlar',language:'Dil',theme:'Tema',precision:'Ondalık hassasiyet',save:'Kaydet',calculate:'Hesapla',cost:'Maliyet',sale:'Satış fiyatı',price:'Fiyat',rate:'Oran',amount:'Tutar',result:'Sonuç',dark:'Koyu',light:'Açık',auto:'Otomatik',note:'Not',empty:'Henüz kayıt yok',delete:'Sil',all:'Tümü',error:'Geçersiz ifade',memory:'Bellek',use:'Sonucu sonraki araca aktar'},
-en:{title:'Professional Calculator',tabs:['Basic','Scientific','Finance','Convert','Tools','Settings'],search:'Search tools…',basic:'Basic calculator',scientific:'Scientific calculator',history:'History',copy:'Copy result',clear:'Clear',profit:'Profit / Loss',discount:'Discount',tax:'Tax / VAT',install:'Installments',percent:'Percent',invest:'Investment',unit:'Unit converter',toman:'Toman ↔ Rial',quantity:'Quantity × Unit price',area:'Area & tiles',date:'Date & age',bmi:'BMI & health',fuel:'Fuel & distance',currency:'Currency',random:'Random tools',fraction:'Fractions',programmer:'Programmer',settings:'Settings',language:'Language',theme:'Theme',precision:'Decimal precision',save:'Save',calculate:'Calculate',cost:'Cost price',sale:'Sale price',price:'Price',rate:'Rate',amount:'Amount',result:'Result',dark:'Dark',light:'Light',auto:'Auto',note:'Note',empty:'No calculations yet',delete:'Delete',all:'All',error:'Invalid expression',memory:'Memory',use:'Use in next tool'},
-ar:{title:'آلة حاسبة احترافية',tabs:['أساسي','علمي','مالي','تحويل','أدوات','الإعدادات'],search:'ابحث عن أداة…',basic:'آلة حاسبة أساسية',scientific:'آلة حاسبة علمية',history:'السجل',copy:'نسخ النتيجة',clear:'مسح',profit:'الربح والخسارة',discount:'الخصم',tax:'الضريبة',install:'الأقساط',percent:'النسبة المئوية',invest:'الاستثمار',unit:'تحويل الوحدات',toman:'تومان ↔ ريال',quantity:'الكمية × سعر الوحدة',area:'المساحة والبلاط',date:'التاريخ والعمر',bmi:'مؤشر كتلة الجسم',fuel:'الوقود والمسافة',currency:'العملة',random:'أدوات عشوائية',fraction:'الكسور',programmer:'المبرمج',settings:'الإعدادات',language:'اللغة',theme:'المظهر',precision:'الدقة العشرية',save:'حفظ',calculate:'احسب',cost:'سعر التكلفة',sale:'سعر البيع',price:'السعر',rate:'النسبة',amount:'المبلغ',result:'النتيجة',dark:'داكن',light:'فاتح',auto:'تلقائي',note:'ملاحظة',empty:'لا توجد عمليات بعد',delete:'حذف',all:'الكل',error:'تعبير غير صالح',memory:'الذاكرة',use:'استخدم في الأداة التالية'}};
-let lang=store.get('lang',navigator.language?.slice(0,2) in dict?navigator.language.slice(0,2):'fa'),theme=store.get('theme','auto'),precision=store.get('precision',2),active=0,financeMode='profit',toolsMode='toman',expression='',ans=0,undoStack=[],history=store.get('history',[]),memory=store.get('memory',[0,0,0]);
-const t=k=>dict[lang][k]||k, faDigits=s=>lang==='fa'?String(s).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[+d]):lang==='ar'?String(s).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[+d]):String(s);
-const navNames=['basic','scientific','profit','unit','toman','settings'];
-function toast(s){let e=$('#toast');e.textContent=s;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),1900)}
-function save(){store.set('history',history);store.set('memory',memory);store.set('lang',lang);store.set('theme',theme);store.set('precision',precision)}
-function setTheme(){let dark=theme==='dark'||(theme==='auto'&&matchMedia('(prefers-color-scheme: dark)').matches);document.body.classList.toggle('dark',dark)}
-function renderNav(){let names=t('tabs');$('#tabs').innerHTML=names.map((n,i)=>`<button class="tab ${i===active?'active':''}" data-tab="${i}">${['🧮','🔬','💰','📐','🛠️','⚙️'][i]} ${n}</button>`).join('');$('#tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{active=+b.dataset.tab;render()})}
-function panel(title,html){return `<section class="panel"><h2>${title}</h2>${html}</section>`}
-function input(id,label,value='',type='number'){return `<div class="field"><label for="${id}">${label}</label><input id="${id}" type="${type}" value="${value}" ${type==='number'?'step="any"':''}></div>`}
-function val(id){return Number($('#'+id)?.value||0)}
-function output(html){$('#output').innerHTML=html}
-function addHistory(expr,res){history.unshift({expr,res,at:new Date().toLocaleString(),note:''});history=history.slice(0,150);save()}
-function safeEval(src){let s=String(src).replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-').replace(/π/g,'Math.PI').replace(/\be\b/g,'Math.E').replace(/\bsqrt\(/g,'Math.sqrt(').replace(/\bsin\(/g,'Math.sin(').replace(/\bcos\(/g,'Math.cos(').replace(/\btan\(/g,'Math.tan(').replace(/\blog\(/g,'Math.log10(').replace(/\bln\(/g,'Math.log(').replace(/\^/g,'**').replace(/(\d+(?:\.\d+)?)%/g,'($1/100)');if(!/^[0-9+\-*/().,\sMathPIE_sqrtincostalog10]+$/.test(s))throw Error('invalid');let result=Function('"use strict";return ('+s+')')();if(!Number.isFinite(result))throw Error('invalid');return result}
-function fmt(n){return Number(n).toLocaleString(lang==='fa'?'fa-IR':lang==='ar'?'ar':'en-US',{maximumFractionDigits:precision})}
-function renderBasic(science=false){let keys=science?['sin(','cos(','tan(','log(','ln(','√(','x²','xʸ','π','e','(',')','7','8','9','÷','4','5','6','×','1','2','3','−','0','.','%','+','⌫','AC','=','±']:['7','8','9','÷','4','5','6','×','1','2','3','−','0','.','%','+','⌫','AC','(',')','=','±'];return `<div class="calc-layout"><div class="panel"><div class="display"><input class="expression" id="expr" value="${expression}" placeholder="0" aria-label="Expression"><div class="result" id="calcResult">${ans?fmt(ans):'0'}</div></div><div class="keys">${keys.map(k=>`<button class="key ${['÷','×','−','+','=','AC','⌫'].includes(k)?'op':''} ${k==='='?'equal':''}" data-key="${k}">${k}</button>`).join('')}</div><div class="actions"><button class="action secondary" id="copy">${t('copy')}</button><button class="action secondary" id="memAdd">M+</button><button class="action secondary" id="memRecall">MR</button><button class="action secondary" id="memClear">MC</button></div></div><div>${panel(t('history'),historyHTML())}</div></div>`}
-function historyHTML(){return history.length?history.slice(0,12).map((h,i)=>`<div class="history-item"><div><b>${h.res}</b><div class="muted small">${h.expr}</div><input data-note="${i}" placeholder="${t('note')}" value="${h.note||''}" style="margin-top:5px;padding:5px;border-radius:7px;border:1px solid var(--line);width:100%;background:var(--bg);color:var(--text)"></div><button data-reuse="${i}">↗</button></div>`).join(''):`<div class="empty">${t('empty')}</div>`}
-function finance(){let modes=['profit','discount','tax','install','percent','invest'];let mode=financeMode;let fields=mode==='profit'?input('cost',t('cost'))+input('sale',t('sale')):mode==='discount'?input('price',t('price'))+input('rate',t('rate')+' %'):mode==='tax'?input('amount',t('amount'))+input('rate',t('rate')+' %','9'):mode==='install'?input('amount',t('amount'))+input('down','Down payment')+input('months','Months','12')+input('rate',t('rate')+' %'):mode==='percent'?input('amount','X')+input('rate','Y'):input('amount','Initial capital')+input('rate','Monthly %')+input('months','Months','12');return panel(t(mode),`<div class="subtabs">${modes.map(m=>`<button class="subtab ${mode===m?'active':''}" data-mode="${m}">${t(m)}</button>`).join('')}</div><div class="field-grid">${fields}</div><div class="actions"><button class="action" id="doCalc">${t('calculate')}</button></div><div class="output" id="output">${t('result')}</div>`)}
-function tools(){let modes=['toman','quantity','area','bmi','fuel','currency','random','fraction','programmer'];let m=toolsMode;let fields=m==='toman'?input('amount',t('amount')):m==='quantity'?input('amount','Quantity')+input('price','Unit price'):m==='area'?input('a','Length')+input('b','Width')+input('rate','Waste %','5'):m==='bmi'?input('a','Weight (kg)')+input('b','Height (cm)'):m==='fuel'?input('a','Distance (km)')+input('b','Consumption (L/100km)')+input('price','Fuel price / L'):m==='currency'?input('amount','Amount')+`<div class="field"><label>From</label><select id="from"><option>Toman</option><option>USD</option><option>EUR</option><option>AED</option><option>TRY</option></select></div><div class="field"><label>To</label><select id="to"><option>USD</option><option>Toman</option><option>EUR</option><option>AED</option><option>TRY</option></select></div>`:m==='random'?input('a','Minimum','1')+input('b','Maximum','100'):m==='fraction'?input('a','Numerator')+input('b','Denominator'):input('a','Decimal / integer');return panel(t(m),`<div class="subtabs">${modes.map(x=>`<button class="subtab ${m===x?'active':''}" data-tool="${x}">${t(x)}</button>`).join('')}</div><div class="field-grid">${fields}</div><div class="actions"><button class="action" id="doTool">${t('calculate')}</button></div><div class="output" id="output">${t('result')}</div>`)}
-function convert(){let html=`<div class="field-grid">${input('amount','Value','1')}<div class="field"><label>Conversion</label><select id="unitMode"><option value="length">Length: m → ft</option><option value="weight">Weight: kg → lb</option><option value="temp">Temperature: °C → °F</option><option value="volume">Volume: L → mL</option></select></div></div><div class="actions"><button class="action" id="convertBtn">${t('calculate')}</button></div><div class="output" id="output"></div>`;return panel(t('unit'),html)}
-function settings(){return panel(t('settings'),`<div class="field-grid"><div class="field"><label>${t('language')}</label><select id="langSet"><option value="fa">فارسی</option><option value="tr">Türkçe</option><option value="en">English</option><option value="ar">العربية</option></select></div><div class="field"><label>${t('theme')}</label><select id="themeSet"><option value="auto">${t('auto')}</option><option value="light">${t('light')}</option><option value="dark">${t('dark')}</option></select></div><div class="field"><label>${t('precision')}</label><select id="precisionSet">${[0,1,2,3,4,5,6].map(x=>`<option>${x}</option>`).join('')}</select></div></div><div class="actions"><button class="action" id="saveSettings">${t('save')}</button><button class="action secondary" id="export">Export JSON</button><button class="action secondary" id="clearHistory">${t('clear')} ${t('history')}</button></div><div class="output">Offline-ready • Local storage • No analytics<br>Developer: Hadi Rasouli</div>`)}
-function render(){document.documentElement.lang=lang;document.documentElement.dir=['fa','ar'].includes(lang)?'rtl':'ltr';$('#appTitle').textContent=t('title');$('#quickLang').value=lang;$('#globalSearch').placeholder=t('search');renderNav();$('#main').innerHTML=active===0?renderBasic():active===1?renderBasic(true):active===2?finance():active===3?convert():active===4?tools():settings();bind();setTheme()}
-function bind(){document.querySelectorAll('[data-key]').forEach(b=>b.onclick=()=>key(b.dataset.key));let expr=$('#expr');if(expr){expr.oninput=()=>{expression=expr.value;try{$('#calcResult').textContent=fmt(safeEval(expression))}catch{$('#calcResult').textContent='…'}};expr.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();equals()} }}$('#copy')?.addEventListener('click',()=>copy(String(ans)));$('#memAdd')?.addEventListener('click',()=>{memory[0]=ans;save();toast('M1 saved')});$('#memRecall')?.addEventListener('click',()=>{expression+=memory[0];$('#expr').value=expression;$('#expr').dispatchEvent(new Event('input'))});$('#memClear')?.addEventListener('click',()=>{memory=[0,0,0];save()});document.querySelectorAll('[data-reuse]').forEach(b=>b.onclick=()=>{expression=String(history[+b.dataset.reuse].res);active=0;render()});document.querySelectorAll('[data-note]').forEach(x=>x.onchange=()=>{history[+x.dataset.note].note=x.value;save()});document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{financeMode=b.dataset.mode;render()});document.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>{toolsMode=b.dataset.tool;render()});$('#doCalc')?.addEventListener('click',doFinance);$('#doTool')?.addEventListener('click',doTool);$('#convertBtn')?.addEventListener('click',doConvert);$('#saveSettings')?.addEventListener('click',()=>{lang=$('#langSet').value;theme=$('#themeSet').value;precision=+$ ('#precisionSet').value;save();render()});if($('#langSet'))$('#langSet').value=lang;if($('#themeSet'))$('#themeSet').value=theme;if($('#precisionSet'))$('#precisionSet').value=precision;$('#clearHistory')?.addEventListener('click',()=>{history=[];save();render()});$('#export')?.addEventListener('click',()=>{let blob=new Blob([JSON.stringify({history,memory,lang,theme},null,2)],{type:'application/json'});download(blob,'professional-calculator-data.json')})}
-function key(k){if(k==='AC'){expression='';ans=0}else if(k==='⌫')expression=expression.slice(0,-1);else if(k==='='){equals();return}else if(k==='±'){expression='-('+expression+')'}else if(k==='x²')expression+='^2';else if(k==='xʸ')expression+='^';else if(k==='√(')expression+='sqrt(';else expression+=k;$('#expr').value=expression;$('#expr').dispatchEvent(new Event('input'))}
-function equals(){try{let res=safeEval(expression);ans=Number(res.toFixed(10));addHistory(expression,ans);expression=String(ans);render()}catch{toast(t('error'))}}
-function doFinance(){let res;if(financeMode==='profit'){let c=val('cost'),s=val('sale'),p=s-c;res=`سود: <strong>${fmt(p)}</strong><br>درصد سود: ${fmt(c?p/c*100:0)}%<br>حاشیه سود: ${fmt(s?p/s*100:0)}%`}else if(financeMode==='discount'){let p=val('price'),r=val('rate');res=`مقدار تخفیف: <strong>${fmt(p*r/100)}</strong><br>قیمت نهایی: ${fmt(p*(1-r/100))}`}else if(financeMode==='tax'){let a=val('amount'),r=val('rate');res=`مالیات: <strong>${fmt(a*r/100)}</strong><br>مبلغ با مالیات: ${fmt(a*(1+r/100))}`}else if(financeMode==='install'){let a=val('amount')-val('down'),r=val('rate'),n=Math.max(1,val('months')),total=a*(1+r/100);res=`هر قسط: <strong>${fmt(total/n)}</strong><br>کل پرداخت: ${fmt(total+val('down'))}<br>هزینه/سود: ${fmt(a*r/100)}`}else if(financeMode==='percent'){res=`${fmt(val('amount')/100*val('rate'))}`}else{let a=val('amount'),r=val('rate')/100,n=val('months');res=`سود ساده: ${fmt(a*r*n)}<br>سرمایه مرکب نهایی: <strong>${fmt(a*Math.pow(1+r,n))}</strong>`}output(res)}
-function doTool(){let r;if(toolsMode==='toman'){r=`${fmt(val('amount')*10)} ریال` }else if(toolsMode==='quantity'){r=`مجموع: <strong>${fmt(val('amount')*val('price'))}</strong>`}else if(toolsMode==='area'){let area=val('a')*val('b');r=`مساحت: ${fmt(area)}<br>با پرت: ${fmt(area*(1+val('rate')/100))}`}else if(toolsMode==='bmi'){let bmi=val('a')/Math.pow(val('b')/100,2);r=`BMI: <strong>${fmt(bmi)}</strong> — ${bmi<18.5?'کمبود وزن':bmi<25?'طبیعی':bmi<30?'اضافه وزن':'چاقی'}`}else if(toolsMode==='fuel'){let liters=val('a')*val('b')/100;r=`مصرف سوخت: ${fmt(liters)} L<br>هزینه سفر: <strong>${fmt(liters*val('price'))}</strong>`}else if(toolsMode==='currency'){let rates={Toman:1,USD:60000,EUR:65000,AED:16300,TRY:1800};r=fmt(val('amount')*rates[$('#from').value]/rates[$('#to').value])+' '+$('#to').value}else if(toolsMode==='random'){r=String(Math.floor(Math.random()*(val('b')-val('a')+1))+val('a'))}else if(toolsMode==='fraction'){let a=val('a'),b=val('b'),g=(x,y)=>y?g(y,x%y):Math.abs(x);let d=g(a,b)||1;r=`${a}/${b} = <strong>${a/d}/${b/d}</strong> = ${fmt(a/b)}`}else{let n=Math.trunc(val('a'));r=`BIN: ${n.toString(2)}<br>OCT: ${n.toString(8)}<br>HEX: ${n.toString(16).toUpperCase()}`}output(r)}
-function doConvert(){let n=val('amount'),m=$('#unitMode').value,r=m==='length'?`${fmt(n*3.28084)} ft`:m==='weight'?`${fmt(n*2.20462)} lb`:m==='temp'?`${fmt(n*9/5+32)} °F`:`${fmt(n*1000)} mL`;output(`<strong>${r}</strong>`)}
-async function copy(s){try{await navigator.clipboard.writeText(s);toast('Copied')}catch{toast(s)}}
-function download(blob,name){let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href)}
-$('#quickLang').onchange=e=>{lang=e.target.value;save();render()};$('#themeBtn').onclick=()=>{theme=theme==='dark'?'light':'dark';save();setTheme()};
-$('#globalSearch').oninput=e=>{let q=e.target.value.toLowerCase();let map=[['basic',['basic','پایه','temel','أساسي'],0],['scientific',['scientific','علمی','bilimsel','علمي'],1],['profit',['profit','سود','kâr','الربح'],2],['unit',['convert','تبدیل','dönüştür','تحويل'],3],['toman',['تومان','rial','ریال'],4],['settings',['settings','تنظیمات','ayarlar'],5]];let found=map.find(x=>x[1].some(k=>k.includes(q)||q.includes(k)));if(found&&q.length>1){active=found[2];render()}};
-document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();$('#globalSearch').focus()}if(e.altKey&&/^[1-6]$/.test(e.key)){active=+e.key-1;render()}if(e.key==='Escape'){expression='';if($('#expr'))$('#expr').value=''}});
-let deferredPrompt;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;let b=document.createElement('button');b.className='action';b.textContent='Install app';b.onclick=async()=>{deferredPrompt.prompt();deferredPrompt=null;b.remove()};$('#installArea').append(b)});
-if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
-render();
+/* =========================================
+   PROFESSIONAL CALCULATOR
+   APP.JS - VERSION 2026
+   Developer: Hadi Rasouli
+========================================= */
+
+"use strict";
+
+/* =========================================
+   HELPERS & STORAGE
+========================================= */
+
+const $ = (selector) => document.querySelector(selector);
+const $$ = (selector) => [...document.querySelectorAll(selector)];
+
+const STORAGE = {
+  get(key, fallback = null) {
+    try {
+      const value = localStorage.getItem(key);
+      return value === null ? fallback : JSON.parse(value);
+    } catch {
+      return fallback;
+    }
+  },
+
+  set(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+      console.error("Storage error:", error);
+    }
+  }
+};
+
+const state = {
+  expression: "",
+  result: "0",
+  history: STORAGE.get("pc_history", []),
+  favorites: STORAGE.get("pc_favorites", []),
+  alarms: STORAGE.get("pc_alarms", []),
+  language: STORAGE.get("pc_language", "fa"),
+  theme: STORAGE.get("pc_theme", "system"),
+  scientific: false,
+  currentPage: "calculator",
+  onboardingStep: 0,
+  installPrompt: null
+};
+
+/* =========================================
+   TRANSLATIONS
+========================================= */
+
+const translations = {
+  fa: {
+    appSubtitle: "ماشین حساب حرفه‌ای",
+    calculator: "ماشین حساب",
+    tools: "ابزارها",
+    history: "تاریخچه",
+    favorites: "علاقه‌مندی‌ها",
+    calculatorTitle: "ماشین حساب",
+    calculatorDescription: "محاسبات سریع و دقیق",
+    install: "نصب اپلیکیشن",
+    installed: "اپلیکیشن نصب شده است",
+    notificationEnabled: "اعلان‌ها فعال شدند",
+    notificationDenied: "اجازه اعلان داده نشد",
+    copied: "نتیجه کپی شد",
+    saved: "ذخیره شد",
+    deleted: "حذف شد",
+    emptyHistory: "هنوز محاسبه‌ای ثبت نشده است.",
+    emptyFavorites: "هنوز موردی ذخیره نشده است.",
+    invalid: "عبارت ریاضی نامعتبر است",
+    onboardingTitle: [
+      "به Professional Calculator خوش آمدید",
+      "محاسبات سریع و آسان",
+      "ابزارهای کاربردی",
+      "شخصی‌سازی برنامه"
+    ],
+    onboardingDescription: [
+      "با ماشین حساب حرفه‌ای، محاسبات روزمره خود را ساده کنید.",
+      "از محاسبات پایه و علمی برای حل مسائل استفاده کنید.",
+      "از ابزارهای درصد، تخفیف، اقساط و تبدیل واحد بهره ببرید.",
+      "زبان، ظاهر و تنظیمات اپلیکیشن را مطابق نیاز خود تغییر دهید."
+    ]
+  },
+
+  en: {
+    appSubtitle: "Professional Calculator",
+    calculator: "Calculator",
+    tools: "Tools",
+    history: "History",
+    favorites: "Favorites",
+    calculatorTitle: "Calculator",
+    calculatorDescription: "Fast and accurate calculations",
+    install: "Install App",
+    installed: "App already installed",
+    notificationEnabled: "Notifications enabled",
+    notificationDenied: "Notification permission denied",
+    copied: "Result copied",
+    saved: "Saved",
+    deleted: "Deleted",
+    emptyHistory: "No calculations yet.",
+    emptyFavorites: "No favorites yet.",
+    invalid: "Invalid mathematical expression",
+    onboardingTitle: [
+      "Welcome to Professional Calculator",
+      "Fast and easy calculations",
+      "Useful tools",
+      "Customize your app"
+    ],
+    onboardingDescription: [
+      "Make your daily calculations easier.",
+      "Use basic and scientific calculations.",
+      "Explore percentage, discount, loan and unit tools.",
+      "Customize language, theme and settings."
+    ]
+  },
+
+  tr: {
+    appSubtitle: "Profesyonel Hesap Makinesi",
+    calculator: "Hesap Makinesi",
+    tools: "Araçlar",
+    history: "Geçmiş",
+    favorites: "Favoriler",
+    calculatorTitle: "Hesap Makinesi",
+    calculatorDescription: "Hızlı ve doğru hesaplamalar",
+    install: "Uygulamayı yükle",
+    installed: "Uygulama yüklendi",
+    notificationEnabled: "Bildirimler etkinleştirildi",
+    notificationDenied: "Bildirim izni reddedildi",
+    copied: "Sonuç kopyalandı",
+    saved: "Kaydedildi",
+    deleted: "Silindi",
+    emptyHistory: "Henüz hesaplama yok.",
+    emptyFavorites: "Henüz favori yok.",
+    invalid: "Geçersiz matematiksel ifade",
+    onboardingTitle: [
+      "Professional Calculator'a hoş geldiniz",
+      "Hızlı ve kolay hesaplama",
+      "Kullanışlı araçlar",
+      "Uygulamanızı özelleştirin"
+    ],
+    onboardingDescription: [
+      "Günlük hesaplamalarınızı kolaylaştırın.",
+      "Temel ve bilimsel hesaplamaları kullanın.",
+      "Yüzde, indirim, kredi ve birim araçlarını keşfedin.",
+      "Dil, tema ve ayarları özelleştirin."
+    ]
+  },
+
+  ar: {
+    appSubtitle: "آلة حاسبة احترافية",
+    calculator: "الحاسبة",
+    tools: "الأدوات",
+    history: "السجل",
+    favorites: "المفضلة",
+    calculatorTitle: "الحاسبة",
+    calculatorDescription: "حسابات سريعة ودقيقة",
+    install: "تثبيت التطبيق",
+    installed: "تم تثبيت التطبيق",
+    notificationEnabled: "تم تفعيل الإشعارات",
+    notificationDenied: "تم رفض إذن الإشعارات",
+    copied: "تم نسخ النتيجة",
+    saved: "تم الحفظ",
+    deleted: "تم الحذف",
+    emptyHistory: "لا توجد حسابات حتى الآن.",
+    emptyFavorites: "لا توجد عناصر مفضلة.",
+    invalid: "تعبير رياضي غير صالح",
+    onboardingTitle: [
+      "مرحباً بك في Professional Calculator",
+      "حسابات سريعة وسهلة",
+      "أدوات مفيدة",
+      "خصص التطبيق"
+    ],
+    onboardingDescription: [
+      "اجعل حساباتك اليومية أسهل.",
+      "استخدم الحسابات الأساسية والعلمية.",
+      "اكتشف أدوات النسبة والخصم والقروض والوحدات.",
+      "خصص اللغة والمظهر والإعدادات."
+    ]
+  }
+};
+
+function t(key) {
+  return translations[state.language]?.[key] ??
+    translations.fa[key] ??
+    key;
+}
+
+/* =========================================
+   TOAST
+========================================= */
+
+function toast(message) {
+  const container = $("#toast-container");
+  if (!container) return;
+
+  const item = document.createElement("div");
+  item.className = "toast";
+  item.textContent = message;
+
+  container.appendChild(item);
+
+  setTimeout(() => item.remove(), 2800);
+}
+
+/* =========================================
+   THEME
+========================================= */
+
+function applyTheme() {
+  let theme = state.theme;
+
+  if (theme === "system") {
+    theme = window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
+  }
+
+  document.documentElement.dataset.theme = theme;
+
+  if ($("#theme-select")) {
+    $("#theme-select").value = state.theme;
+  }
+
+  if ($("#theme-toggle")) {
+    $("#theme-toggle").querySelector("span").textContent =
+      theme === "dark" ? "☀" : "☾";
+  }
+}
+
+function setTheme(theme) {
+  state.theme = theme;
+  STORAGE.set("pc_theme", theme);
+  applyTheme();
+}
+
+/* =========================================
+   LANGUAGE
+========================================= */
+
+function setLanguage(language) {
+  if (!translations[language]) return;
+
+  state.language = language;
+  STORAGE.set("pc_language", language);
+
+  document.documentElement.lang = language;
+  document.documentElement.dir =
+    ["fa", "ar"].includes(language) ? "rtl" : "ltr";
+
+  $$("[data-i18n]").forEach(element => {
+    const key = element.dataset.i18n;
+    if (translations[language][key]) {
+      element.textContent = t(key);
+    }
+  });
+
+  renderHistory();
+  renderFavorites();
+  renderOnboarding();
+
+  if ($("#language-select")) {
+    $("#language-select").value = language;
+  }
+}
+
+/* =========================================
+   NAVIGATION
+========================================= */
+
+function navigate(page) {
+  const target = $(`#page-${page}`);
+  if (!target) return;
+
+  $$(".page").forEach(item => item.classList.remove("active"));
+  target.classList.add("active");
+
+  $$(".nav-item").forEach(item => {
+    item.classList.toggle("active", item.dataset.page === page);
+  });
+
+  state.currentPage = page;
+
+  $("#main-navigation").classList.remove("menu-open");
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+$$(".nav-item").forEach(button => {
+  button.addEventListener("click", () => navigate(button.dataset.page));
+});
+
+$$("[data-open-page]").forEach(button => {
+  button.addEventListener("click", () => navigate(button.dataset.openPage));
+});
+
+$("#menu-toggle")?.addEventListener("click", () => {
+  $("#main-navigation").classList.toggle("menu-open");
+});
+
+/* =========================================
+   CALCULATOR ENGINE
+========================================= */
+
+function updateDisplay() {
+  $("#calculation-expression").textContent =
+    state.expression || "0";
+
+  $("#calculation-result").textContent =
+    state.result;
+}
+
+function appendValue(value) {
+  state.expression += value;
+  state.result = previewCalculation(state.expression);
+  updateDisplay();
+}
+
+function clearCalculator() {
+  state.expression = "";
+  state.result = "0";
+  updateDisplay();
+}
+
+function deleteLast() {
+  state.expression = state.expression.slice(0, -1);
+  state.result = previewCalculation(state.expression);
+  updateDisplay();
+}
+
+function changeSign() {
+  const match = state.expression.match(/(\d*\.?\d+)$/);
+
+  if (match) {
+    const value = match[0];
+    const start = match.index;
+
+    const before = state.expression.slice(0, start);
+    state.expression =
+      before.endsWith("-")
+        ? before.slice(0, -1) + value
+        : before + "-" + value;
+
+    state.result = previewCalculation(state.expression);
+    updateDisplay();
+  }
+}
+
+function percentValue() {
+  const match = state.expression.match(/(\d*\.?\d+)$/);
+
+  if (!match) return;
+
+  const value = Number(match[0]) / 100;
+  state.expression =
+    state.expression.slice(0, match.index) + value;
+
+  state.result = previewCalculation(state.expression);
+  updateDisplay();
+}
+
+/*
+  Safe arithmetic parser:
+  Does not use eval() or new Function().
+*/
+
+function tokenize(expression) {
+  const source = expression.replace(/\s+/g, "");
+  const tokens = [];
+  let i = 0;
+
+  while (i < source.length) {
+    const char = source[i];
+
+    if (/[0-9.]/.test(char)) {
+      let number = "";
+      let dots = 0;
+
+      while (i < source.length && /[0-9.]/.test(source[i])) {
+        if (source[i] === ".") dots++;
+        if (dots > 1) throw new Error("Invalid number");
+
+        number += source[i++];
+      }
+
+      tokens.push(Number(number));
+      continue;
+    }
+
+    if ("+-*/^()".includes(char)) {
+      tokens.push(char);
+      i++;
+      continue;
+    }
+
+    throw new Error("Invalid character");
+  }
+
+  return tokens;
+}
+
+function parseExpression(tokens) {
+  let position = 0;
+
+  function peek() {
+    return tokens[position];
+  }
+
+  function consume() {
+    return tokens[position++];
+  }
+
+  function primary() {
+    const token = consume();
+
+    if (token === "(") {
+      const value = addSub();
+
+      if (consume() !== ")") {
+        throw new Error("Missing parenthesis");
+      }
+
+      return value;
+    }
+
+    if (token === "+") return unary();
+    if (token === "-") return -unary();
+
+    if (typeof token === "number" && Number.isFinite(token)) {
+      return token;
+    }
+
+    throw new Error("Invalid expression");
+  }
+
+  function unary() {
+    if (peek() === "+") {
+      consume();
+      return unary();
+    }
+
+    if (peek() === "-") {
+      consume();
+      return -unary();
+    }
+
+    return primary();
+  }
+
+  function power() {
+    let value = unary();
+
+    if (peek() === "^") {
+      consume();
+      value = Math.pow(value, power());
+    }
+
+    return value;
+  }
+
+  function multiplyDivide() {
+    let value = power();
+
+    while (peek() === "*" || peek() === "/") {
+      const operator = consume();
+      const next = power();
+
+      value = operator === "*"
+        ? value * next
+        : value / next;
+    }
+
+    return value;
+  }
+
+  function addSub() {
+    let value = multiplyDivide();
+
+    while (peek() === "+" || peek() === "-") {
+      const operator = consume();
+      const next = multiplyDivide();
+
+      value = operator === "+"
+        ? value + next
+        : value - next;
+    }
+
+    return value;
+  }
+
+  const result = addSub();
+
+  if (position !== tokens.length) {
+    throw new Error("Unexpected token");
+  }
+
+  return result;
+}
+
+function calculate(expression) {
+  const tokens = tokenize(expression);
+
+  if (!tokens.length) throw new Error("Empty expression");
+
+  const result = parseExpression(tokens);
+
+  if (!Number.isFinite(result)) {
+    throw new Error("Invalid result");
+  }
+
+  return Number(result.toPrecision(12)).toString();
+}
+
+function previewCalculation(expression) {
+  if (!expression) return "0";
+
+  try {
+    return calculate(expression);
+  } catch {
+    return " ";
+  }
+}
+
+function calculateResult() {
+  if (!state.expression) return;
+
+  try {
+    const result = calculate(state.expression);
+
+    addHistory(state.expression, result);
+
+    state.result = result;
+    state.expression = result;
+
+    updateDisplay();
+
+  } catch {
+    toast(t("invalid"));
+  }
+}
+
+/* =========================================
+   SCIENTIFIC CALCULATOR
+========================================= */
+
+function scientificFunction(name) {
+  const match = state.expression.match(/(\d*\.?\d+)$/);
+
+  if (name === "power") {
+    appendValue("^");
+    return;
+  }
+
+  if (!match && name !== "sqrt") return;
+
+  const number = Number(match?.[0] || 0);
+  let result;
+
+  switch (name) {
+    case "sin":
+      result = Math.sin(number * Math.PI / 180);
+      break;
+
+    case "cos":
+      result = Math.cos(number * Math.PI / 180);
+      break;
+
+    case "tan":
+      result = Math.tan(number * Math.PI / 180);
+      break;
+
+    case "log":
+      result = Math.log10(number);
+      break;
+
+    case "ln":
+      result = Math.log(number);
+      break;
+
+    case "sqrt":
+      result = Math.sqrt(number);
+      break;
+
+    case "square":
+      result = number ** 2;
+      break;
+
+    default:
+      return;
+  }
+
+  if (!Number.isFinite(result)) {
+    toast(t("invalid"));
+    return;
+  }
+
+  const formatted = Number(result.toPrecision(12)).toString();
+
+  state.expression = formatted;
+  state.result = formatted;
+  updateDisplay();
+}
+
+$("#calculator-mode-toggle")?.addEventListener("click", () => {
+  state.scientific = !state.scientific;
+
+  $("#scientific-keys").classList.toggle(
+    "hidden",
+    !state.scientific
+  );
+
+  $("#calculator-mode-toggle").textContent =
+    state.scientific ? "عادی" : "علمی";
+});
+
+/* =========================================
+   CALCULATOR BUTTON EVENTS
+========================================= */
+
+$$(".key-button").forEach(button => {
+  button.addEventListener("click", () => {
+    const action = button.dataset.action;
+    const value = button.dataset.value;
+
+    if (action === "clear") clearCalculator();
+    else if (action === "delete") deleteLast();
+    else if (action === "percent") percentValue();
+    else if (action === "sign") changeSign();
+    else if (action === "calculate") calculateResult();
+    else if (value !== undefined) appendValue(value);
+  });
+});
+
+$$(".scientific-keys button").forEach(button => {
+  button.addEventListener("click", () => {
+    scientificFunction(button.dataset.value);
+  });
+});
+
+document.addEventListener("keydown", event => {
+  if (state.currentPage !== "calculator") return;
+
+  if (/^[0-9.]$/.test(event.key)) {
+    appendValue(event.key);
+  } else if (["+", "-", "*", "/", "^", "(", ")"].includes(event.key)) {
+    appendValue(event.key);
+  } else if (event.key === "Enter" || event.key === "=") {
+    event.preventDefault();
+    calculateResult();
+  } else if (event.key === "Backspace") {
+    deleteLast();
+  } else if (event.key === "Escape") {
+    clearCalculator();
+  }
+});
+
+/* =========================================
+   HISTORY
+========================================= */
+
+function addHistory(expression, result) {
+  state.history.unshift({
+    id: Date.now(),
+    expression,
+    result,
+    date: new Date().toISOString()
+  });
+
+  state.history = state.history.slice(0, 100);
+
+  STORAGE.set("pc_history", state.history);
+  renderHistory();
+}
+
+function renderHistory() {
+  const container = $("#history-list");
+  if (!container) return;
+
+  container.replaceChildren();
+
+  if (!state.history.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty-state";
+    empty.textContent = t("emptyHistory");
+    container.appendChild(empty);
+    return;
+  }
+
+  state.history.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "history-item";
+
+    const info = document.createElement("div");
+
+    const expression = document.createElement("div");
+    expression.textContent = item.expression;
+
+    const result = document.createElement("strong");
+    result.textContent = "= " + item.result;
+
+    const date = document.createElement("small");
+    date.textContent = new Date(item.date).toLocaleString();
+
+    info.append(expression, result, date);
+
+    const reuse = document.createElement("button");
+    reuse.className = "secondary-button";
+    reuse.textContent = "استفاده مجدد";
+
+    reuse.addEventListener("click", () => {
+      state.expression = item.expression;
+      state.result = item.result;
+      updateDisplay();
+      navigate("calculator");
+    });
+
+    card.append(info, reuse);
+    container.appendChild(card);
+  });
+}
+
+$("#clear-history")?.addEventListener("click", () => {
+  if (!confirm("آیا از پاک کردن تاریخچه مطمئن هستید؟")) return;
+
+  state.history = [];
+  STORAGE.set("pc_history", []);
+  renderHistory();
+  toast(t("deleted"));
+});
+
+/* =========================================
+   FAVORITES
+========================================= */
+
+function saveFavorite() {
+  if (!state.expression) return;
+
+  const item = {
+    id: Date.now(),
+    expression: state.expression,
+    result: state.result
+  };
+
+  state.favorites.unshift(item);
+  STORAGE.set("pc_favorites", state.favorites);
+
+  renderFavorites();
+  toast(t("saved"));
+}
+
+$("#save-favorite")?.addEventListener("click", saveFavorite);
+
+function renderFavorites() {
+  const container = $("#favorites-list");
+  if (!container) return;
+
+  container.replaceChildren();
+
+  if (!state.favorites.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty-state";
+    empty.textContent = t("emptyFavorites");
+    container.appendChild(empty);
+    return;
+  }
+
+  state.favorites.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "favorite-item";
+
+    const info = document.createElement("div");
+    info.textContent = `${item.expression} = ${item.result}`;
+
+    const remove = document.createElement("button");
+    remove.className = "danger-button";
+    remove.textContent = "حذف";
+
+    remove.addEventListener("click", () => {
+      state.favorites = state.favorites.filter(
+        favorite => favorite.id !== item.id
+      );
+
+      STORAGE.set("pc_favorites", state.favorites);
+      renderFavorites();
+    });
+
+    card.append(info, remove);
+    container.appendChild(card);
+  });
+}
+
+/* =========================================
+   COPY RESULT
+========================================= */
+
+$("#copy-result")?.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(state.result);
+    toast(t("copied"));
+  } catch {
+    toast("امکان کپی در این مرورگر وجود ندارد.");
+  }
+});
+
+/* =========================================
+   ONBOARDING
+========================================= */
+
+function renderOnboarding() {
+  const lang = translations[state.language];
+  if (!lang) return;
+
+  const step = state.onboardingStep;
+
+  $("#onboarding-title").textContent =
+    lang.onboardingTitle[step];
+
+  $("#onboarding-description").textContent =
+    lang.onboardingDescription[step];
+
+  $("#onboarding-step-indicator").textContent =
+    `${step + 1} / 4`;
+
+  $("#onboarding-progress-bar").style.width =
+    `${(step + 1) * 25}%`;
+
+  $("#onboarding-icon").textContent =
+    ["ƒx", "＋", "▦", "⚙"][step];
+
+  $("#onboarding-next").textContent =
+    step === 3 ? "شروع استفاده" : "بعدی";
+}
+
+function openOnboarding() {
+  state.onboardingStep = 0;
+  renderOnboarding();
+  $("#onboarding-modal").classList.remove("hidden");
+}
+
+function closeOnboarding() {
+  $("#onboarding-modal").classList.add("hidden");
+  STORAGE.set("pc_onboarding_done", true);
+}
+
+$("#onboarding-next")?.addEventListener("click", () => {
+  if (state.onboardingStep < 3) {
+    state.onboardingStep++;
+    renderOnboarding();
+  } else {
+    closeOnboarding();
+  }
+});
+
+$("#onboarding-skip")?.addEventListener("click", closeOnboarding);
+$("#close-onboarding")?.addEventListener("click", closeOnboarding);
+
+$("#replay-onboarding")?.addEventListener("click", openOnboarding);
+
+/* =========================================
+   PWA INSTALL
+========================================= */
+
+window.addEventListener("beforeinstallprompt", event => {
+  event.preventDefault();
+
+  state.installPrompt = event;
+
+  if (!STORAGE.get("pc_install_dismissed", false)) {
+    $("#install-banner")?.classList.remove("hidden");
+  }
+});
+
+$("#install-app")?.addEventListener("click", async () => {
+  if (!state.installPrompt) {
+    showIOSInstallHelp();
+    return;
+  }
+
+  state.installPrompt.prompt();
+
+  const choice = await state.installPrompt.userChoice;
+
+  if (choice.outcome === "accepted") {
+    toast("درخواست نصب پذیرفته شد.");
+  }
+
+  state.installPrompt = null;
+  $("#install-banner")?.classList.add("hidden");
+});
+
+$("#dismiss-install")?.addEventListener("click", () => {
+  $("#install-banner")?.classList.add("hidden");
+  STORAGE.set("pc_install_dismissed", true);
+});
+
+function showIOSInstallHelp() {
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+  if (isIOS) {
+    $("#ios-install-help")?.classList.remove("hidden");
+  } else {
+    toast("نصب مستقیم در این مرورگر در دسترس نیست.");
+  }
+}
+
+window.addEventListener("appinstalled", () => {
+  $("#install-banner")?.classList.add("hidden");
+  toast(t("installed"));
+  STORAGE.set("pc_installed", true);
+});
+
+/* =========================================
+   NOTIFICATIONS
+========================================= */
+
+$("#enable-notifications")?.addEventListener("click", async () => {
+  if (!("Notification" in window)) {
+    toast("این مرورگر از اعلان‌ها پشتیبانی نمی‌کند.");
+    return;
+  }
+
+  try {
+    const permission = await Notification.requestPermission();
+
+    if (permission === "granted") {
+      toast(t("notificationEnabled"));
+    } else {
+      toast(t("notificationDenied"));
+    }
+  } catch {
+    toast("خطا در فعال‌سازی اعلان‌ها.");
+  }
+});
+
+function sendNotification(title, body) {
+  if (!("Notification" in window)) return;
+
+  if (Notification.permission === "granted") {
+    new Notification(title, {
+      body,
+      icon: "./icons/icon-192.png"
+    });
+  }
+}
+
+/* =========================================
+   ALARMS
+========================================= */
+
+$("#open-alarm")?.addEventListener("click", () => {
+  $("#alarm-panel").classList.toggle("hidden");
+});
+
+$("#save-alarm")?.addEventListener("click", async () => {
+  const title = $("#alarm-title").value.trim();
+  const dateValue = $("#alarm-datetime").value;
+
+  if (!title || !dateValue) {
+    toast("عنوان و زمان یادآور را وارد کنید.");
+    return;
+  }
+
+  const date = new Date(dateValue);
+
+  if (!Number.isFinite(date.getTime()) || date <= new Date()) {
+    toast("زمان یادآور باید در آینده باشد.");
+    return;
+  }
+
+  if (!("Notification" in window)) {
+    toast("اعلان در این مرورگر پشتیبانی نمی‌شود.");
+    return;
+  }
+
+  if (Notification.permission !== "granted") {
+    const permission = await Notification.requestPermission();
+
+    if (permission !== "granted") {
+      toast(t("notificationDenied"));
+      return;
+    }
+  }
+
+  const alarm = {
+    id: Date.now(),
+    title,
+    time: date.toISOString()
+  };
+
+  state.alarms.push(alarm);
+  STORAGE.set("pc_alarms", state.alarms);
+
+  $("#alarm-title").value = "";
+  $("#alarm-datetime").value = "";
+
+  renderAlarms();
+  toast("یادآور ذخیره شد.");
+});
+
+function renderAlarms() {
+  const container = $("#alarm-list");
+  if (!container) return;
+
+  container.replaceChildren();
+
+  state.alarms.forEach(alarm => {
+    const item = document.createElement("div");
+    item.className = "history-item";
+
+    const info = document.createElement("div");
+    info.textContent =
+      `${alarm.title} - ${new Date(alarm.time).toLocaleString()}`;
+
+    const remove = document.createElement("button");
+    remove.className = "danger-button";
+    remove.textContent = "حذف";
+
+    remove.addEventListener("click", () => {
+      state.alarms = state.alarms.filter(a => a.id !== alarm.id);
+      STORAGE.set("pc_alarms", state.alarms);
+      renderAlarms();
+    });
+
+    item.append(info, remove);
+    container.appendChild(item);
+  });
+}
+
+/*
+  Browser timers work only while this page is running.
+  They are not reliable background alarms.
+*/
+
+function checkAlarms() {
+  const now = Date.now();
+  let changed = false;
+
+  state.alarms = state.alarms.filter(alarm => {
+    const time = new Date(alarm.time).getTime();
+
+    if (time <= now) {
+      sendNotification("یادآور Professional Calculator", alarm.title);
+      toast(alarm.title);
+      changed = true;
+      return false;
+    }
+
+    return true;
+  });
+
+  if (changed) {
+    STORAGE.set("pc_alarms", state.alarms);
+    renderAlarms();
+  }
+}
+
+setInterval(checkAlarms, 10000);
+
+/* =========================================
+   SETTINGS EVENTS
+========================================= */
+
+$("#theme-select")?.addEventListener("change", event => {
+  setTheme(event.target.value);
+});
+
+$("#language-select")?.addEventListener("change", event => {
+  setLanguage(event.target.value);
+});
+
+$("#theme-toggle")?.addEventListener("click", () => {
+  const current =
+    document.documentElement.dataset.theme === "dark"
+      ? "dark"
+      : "light";
+
+  setTheme(current === "dark" ? "light" : "dark");
+});
+
+/* =========================================
+   TOOLS
+========================================= */
+
+const toolNames = {
+  percentage: "محاسبه درصد",
+  discount: "محاسبه تخفیف",
+  loan: "محاسبه اقساط",
+  interest: "محاسبه سود",
+  unit: "تبدیل واحد",
+  currency: "تبدیل ارز",
+  bmi: "محاسبه BMI",
+  date: "تبدیل تاریخ"
+};
+
+$$("[data-tool]").forEach(button => {
+  button.addEventListener("click", () => {
+    openTool(button.dataset.tool);
+  });
+});
+
+function openTool(tool) {
+  const workspace = $("#tool-workspace");
+
+  workspace.classList.remove("hidden");
+  workspace.replaceChildren();
+
+  const title = document.createElement("h3");
+  title.textContent = toolNames[tool] || "ابزار";
+
+  workspace.appendChild(title);
+
+  const forms = {
+    percentage: `
+      <label>مقدار اصلی</label>
+      <input id="tool-a" type="number" placeholder="مثلاً 200">
+      <label>درصد</label>
+      <input id="tool-b" type="number" placeholder="مثلاً 15">
+      <button id="tool-calculate" class="primary-button">محاسبه</button>
+      <p id="tool-result"></p>
+    `,
+
+    discount: `
+      <label>قیمت اولیه</label>
+      <input id="tool-a" type="number" placeholder="قیمت">
+      <label>درصد تخفیف</label>
+      <input id="tool-b" type="number" placeholder="درصد">
+      <button id="tool-calculate" class="primary-button">محاسبه</button>
+      <p id="tool-result"></p>
+    `,
+
+    bmi: `
+      <label>وزن (کیلوگرم)</label>
+      <input id="tool-a" type="number" placeholder="وزن">
+      <label>قد (سانتی‌متر)</label>
+      <input id="tool-b" type="number" placeholder="قد">
+      <button id="tool-calculate" class="primary-button">محاسبه BMI</button>
+      <p id="tool-result"></p>
+    `,
+
+    loan: `
+      <label>مبلغ وام</label>
+      <input id="tool-a" type="number" placeholder="مبلغ">
+      <label>نرخ سود سالانه (درصد)</label>
+      <input id="tool-b" type="number" placeholder="درصد سود">
+      <label>مدت بازپرداخت (ماه)</label>
+      <input id="tool-c" type="number" placeholder="تعداد ماه">
+      <button id="tool-calculate" class="primary-button">محاسبه قسط</button>
+      <p id="tool-result"></p>
+    `,
+
+    interest: `
+      <label>سرمایه اولیه</label>
+      <input id="tool-a" type="number" placeholder="مبلغ">
+      <label>نرخ سود سالانه (درصد)</label>
+      <input id="tool-b" type="number" placeholder="درصد">
+      <label>مدت (سال)</label>
+      <input id="tool-c" type="number" placeholder="سال">
+      <button id="tool-calculate" class="primary-button">محاسبه سود ساده</button>
+      <p id="tool-result"></p>
+    `,
+
+    unit: `
+      <label>مقدار بر حسب متر</label>
+      <input id="tool-a" type="number" placeholder="متر">
+      <button id="tool-calculate" class="primary-button">تبدیل به سانتی‌متر</button>
+      <p id="tool-result"></p>
+    `,
+
+    currency: `
+      <p>نرخ‌های ارز این نسخه نمونه هستند و باید با منبع معتبر به‌روزرسانی شوند.</p>
+      <label>مبلغ به دلار</label>
+      <input id="tool-a" type="number" placeholder="USD">
+      <button id="tool-calculate" class="primary-button">محاسبه نمونه به یورو</button>
+      <p id="tool-result"></p>
+    `,
+
+    date: `
+      <p>تاریخ امروز دستگاه:</p>
+      <p id="tool-result">${new Date().toLocaleDateString()}</p>
+    `
+  };
+
+  const content = document.createElement("div");
+  content.innerHTML = forms[tool] || "<p>ابزار یافت نشد.</p>";
+
+  workspace.appendChild(content);
+
+  const calculateButton = $("#tool-calculate");
+
+  if (!calculateButton) return;
+
+  calculateButton.addEventListener("click", () => {
+    const a = Number($("#tool-a")?.value);
+    const b = Number($("#tool-b")?.value);
+    const c = Number($("#tool-c")?.value);
+    const output = $("#tool-result");
+
+    if (!Number.isFinite(a) || !Number.isFinite(b)) {
+      output.textContent = "لطفاً مقادیر معتبر وارد کنید.";
+      return;
+    }
+
+    let result;
+
+    switch (tool) {
+      case "percentage":
+        result = a * b / 100;
+        output.textContent = `نتیجه: ${result}`;
+        break;
+
+      case "discount":
+        if (b < 0 || b > 100 || a < 0) {
+          output.textContent = "مقادیر نامعتبر هستند.";
+          return;
+        }
+        result = a - (a * b / 100);
+        output.textContent = `قیمت نهایی: ${result}`;
+        break;
+
+      case "bmi":
+        if (a <= 0 || b <= 0) {
+          output.textContent = "وزن و قد باید مثبت باشند.";
+          return;
+        }
+        result = a / ((b / 100) ** 2);
+        output.textContent = `BMI: ${result.toFixed(2)}`;
+        break;
+
+      case "loan": {
+        if (!Number.isFinite(c) || a < 0 || b < 0 || c <= 0) {
+          output.textContent = "مقادیر نامعتبر هستند.";
+          return;
+        }
+
+        const rate = b / 1200;
+        result = rate === 0
+          ? a / c
+          : a * rate / (1 - Math.pow(1 + rate, -c));
+
+        output.textContent = `قسط ماهانه: ${result.toFixed(2)}`;
+        break;
+      }
+
+      case "interest":
+        if (!Number.isFinite(c) || a < 0 || b < 0 || c < 0) {
+          output.textContent = "مقادیر نامعتبر هستند.";
+          return;
+        }
+        result = a * b / 100 * c;
+        output.textContent = `سود ساده: ${result.toFixed(2)}`;
+        break;
+
+      case "unit":
+        output.textContent = `سانتی‌متر: ${(a * 100).toFixed(2)}`;
+        break;
+
+      case "currency":
+        output.textContent = `یورو نمونه: ${(a * 0.92).toFixed(2)}`;
+        break;
+    }
+  });
+}
+
+/* =========================================
+   INITIALIZATION
+========================================= */
+
+function initializeApp() {
+  applyTheme();
+  setLanguage(state.language);
+
+  if ($("#theme-select")) {
+    $("#theme-select").value = state.theme;
+  }
+
+  renderHistory();
+  renderFavorites();
+  renderAlarms();
+  updateDisplay();
+
+  if (!STORAGE.get("pc_onboarding_done", false)) {
+    openOnboarding();
+  }
+
+  if (window.matchMedia) {
+    window.matchMedia("(prefers-color-scheme: dark)")
+      .addEventListener?.("change", () => {
+        if (state.theme === "system") applyTheme();
+      });
+  }
+
+  $("#app-loader")?.classList.add("hidden");
+}
+
+document.addEventListener("DOMContentLoaded", initializeApp);
